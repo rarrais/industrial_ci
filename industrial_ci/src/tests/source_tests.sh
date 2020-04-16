@@ -26,6 +26,13 @@ function install_catkin_lint {
     ici_install_pkgs_for_command catkin_lint "${PYTHON_VERSION_NAME}-catkin-lint"
 }
 
+function install_code_coverage {
+    echo "Installating Code Coverage Dependencies!"
+    ici_install_pkgs_for_command coverage "${PYTHON_VERSION_NAME}-coverage"
+    ici_install_pkgs_for_command jq "jq"
+    ici_install_pkgs_for_command gcovr "gcovr"
+}
+
 function run_clang_tidy {
     local regex="$1/.*"
     local -n _run_clang_tidy_warnings=$2
@@ -143,6 +150,9 @@ function run_source_tests {
     fi
     if [ "${CLANG_TIDY:-false}" != false ]; then
         run_clang_tidy_check "$target_ws"
+    fi
+    if [ "$CODE_COVERAGE" == "true"  ]; then
+        ici_run "install_code_coverage" install_code_coverage
     fi
 
     extend="$target_ws/install"
