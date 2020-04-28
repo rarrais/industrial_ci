@@ -26,11 +26,23 @@ function install_catkin_lint {
     ici_install_pkgs_for_command catkin_lint "${PYTHON_VERSION_NAME}-catkin-lint"
 }
 
-function install_code_coverage {
-    echo "Installating Code Coverage Dependencies!"
+function install_code_coverage_dependencies {
     ici_install_pkgs_for_command coverage "${PYTHON_VERSION_NAME}-coverage"
     ici_install_pkgs_for_command jq "jq"
     ici_install_pkgs_for_command gcovr "gcovr"
+}
+
+function code_coverage_analysis {
+    local target_ws="$1";
+
+    # shellcheck disable=SC2046
+    if (cd "$target_ws" && python -m coverage combine $(find . -type f -name .coverage);)  then
+      (cd "$target_ws" && python -m coverage xml -o coverage_py.xml)
+    fi
+
+    if [[ ! -z $(find "$target_ws" -type f -name '*.gcda') ]]; then
+      gcovr -r "$target_ws" --xml-pretty > "$target_ws"/coverage_cpp.xml
+    fi
 }
 
 function run_clang_tidy {
@@ -152,7 +164,8 @@ function run_source_tests {
         run_clang_tidy_check "$target_ws"
     fi
     if [ "$CODE_COVERAGE" == "true"  ]; then
-        ici_run "install_code_coverage" install_code_coverage
+        ici_run "install_code_coverage_dependencies" install_code_coverage_dependencies
+        ici_run "code_coverage_analysis" code_coverage_analysis "$target_ws"
     fi
 
     extend="$target_ws/install"
