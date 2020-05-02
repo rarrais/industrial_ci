@@ -35,14 +35,19 @@ function install_code_coverage_dependencies {
 function code_coverage_analysis {
     local target_ws="$1";
 
-    # shellcheck disable=SC2046
-    if (cd "$target_ws" && python -m coverage combine $(find . -type f -name .coverage);)  then
-      (cd "$target_ws" && python -m coverage xml -o coverage_py.xml)
-    fi
+    echo "$target_ws"
 
-    if [[ ! -z $(find "$target_ws" -type f -name '*.gcda') ]]; then
-      gcovr -r "$target_ws" --xml-pretty > "$target_ws"/coverage_cpp.xml
-    fi
+    python -m coverage combine $(find /root/target_ws -type f -name .coverage)
+
+
+    # shellcheck disable=SC2046
+    # if (cd "$target_ws" && python -m coverage combine $(find . -type f -name .coverage);)  then
+    #   (cd "$target_ws" && python -m coverage xml -o coverage_py.xml)
+    # fi
+
+    # if [[ ! -z $(find "$target_ws" -type f -name '*.gcda') ]]; then
+    #   gcovr -r "$target_ws" --xml-pretty > "$target_ws"/coverage_cpp.xml
+    # fi
 }
 
 function run_clang_tidy {
